@@ -483,6 +483,26 @@
     .btn,.mod,.gal img{transition:none}
   }
 </style>
+<!-- Meta Pixel · ExP Pixel 1011587088582742 -->
+<script>
+!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
+document,'script','https://connect.facebook.net/en_US/fbevents.js');
+fbq('init','1011587088582742');
+fbq('track','PageView');
+</script>
+<noscript><img height="1" width="1" style="display:none"
+src="https://www.facebook.com/tr?id=1011587088582742&ev=PageView&noscript=1" alt=""></noscript>
+<!-- End Meta Pixel -->
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-T2DJFQF2');</script>
+<!-- End Google Tag Manager -->
 </head>
 <body>
 
@@ -1135,6 +1155,58 @@ var CONFIG = {
     lb.addEventListener('click', function(ev){
       if(ev.target === lb || ev.target.tagName === 'BUTTON') lb.close();
     });
+  }
+})();
+</script>
+<!-- Eventos de funil · ViewContent no bloco de preco, InitiateCheckout no clique de compra -->
+<script>
+(function(){
+  window.dataLayer = window.dataLayer || [];
+  function px(){ return typeof window.fbq === 'function'; }
+
+  /* ViewContent: quem chega no bloco de preco. Dispara uma vez por sessao de pagina. */
+  var alvo = document.getElementById('preco');
+  var enviado = false;
+  function viewContent(){
+    if(enviado) return; enviado = true;
+    if(px()) fbq('track','ViewContent',{content_name:'A Virada',content_category:'pagina-de-vendas'});
+    dataLayer.push({event:'view_preco_virada'});
+  }
+  if(alvo){
+    if('IntersectionObserver' in window){
+      var io = new IntersectionObserver(function(es){
+        for(var i=0;i<es.length;i++){ if(es[i].isIntersecting){ viewContent(); io.disconnect(); return; } }
+      },{threshold:0.25});
+      io.observe(alvo);
+    }else{
+      window.addEventListener('scroll',function(){
+        var r = alvo.getBoundingClientRect();
+        if(r.top < (window.innerHeight||0) && r.bottom > 0) viewContent();
+      },{passive:true});
+    }
+  }
+
+  /* InitiateCheckout: clique em qualquer botao de compra, levando a posicao do botao */
+  function precoAtual(){
+    var el = document.getElementById('priceTag');
+    if(!el) return null;
+    /* o bloco tem texto extra (data da oferta, preco normal). Pega so o 1o numero depois de R$. */
+    var txt = el.textContent || '';
+    var m = txt.match(/R\$\s*(\d{1,4})/) || txt.match(/(\d{1,4})/);
+    if(!m) return null;
+    var n = parseInt(m[1], 10);
+    return (isNaN(n) || n <= 0 || n > 2000) ? null : n;
+  }
+  var btns = document.querySelectorAll('a.cta');
+  for(var i=0;i<btns.length;i++){
+    btns[i].addEventListener('click', function(){
+      var pos = this.getAttribute('data-pos') || 'desconhecido';
+      var valor = precoAtual();
+      var dados = {content_name:'A Virada', content_category:pos};
+      if(valor){ dados.value = valor; dados.currency = 'BRL'; }
+      if(px()) fbq('track','InitiateCheckout', dados);
+      dataLayer.push({event:'initiate_checkout_virada', posicao:pos, valor:valor});
+    }, {passive:true});
   }
 })();
 </script>
